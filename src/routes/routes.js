@@ -1,10 +1,10 @@
 import express from "express";
 import userController from "../controllers/userController";
-
+import { limiter } from "../middleware/ratelimits/ratelimitor";
 
 const userRouter = express.Router();
 
-userRouter.post("/register", userController.register)
-userRouter.post("/login", userController.login)
+userRouter.post("/register", limiter, userController.register)
+userRouter.post("/login", limiter, userController.login)
 
 export default userRouter;

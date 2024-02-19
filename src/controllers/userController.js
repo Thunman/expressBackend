@@ -5,7 +5,7 @@ import { validationResult } from "express-validator";
 import {
 	registerValidators,
 	loginValidators,
-} from "../validators/userValidator";
+} from "../middleware/validators/userValidator";
 
 const saltRounds = 10;
 

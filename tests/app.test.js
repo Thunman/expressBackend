@@ -2,6 +2,7 @@ import request from "supertest";
 import { startServer, stopServer } from "../server";
 import { User } from "../src/models/models";
 import bcrypt from "bcrypt";
+
 let app;
 
 beforeAll(async () => {
@@ -10,14 +11,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	await stopServer();
-});
-
-describe("GET /", () => {
-	it("responds with a message", async () => {
-		const response = await request(app).get("/");
-		expect(response.status).toBe(200);
-		expect(response.body.message).toBe("Hi");
-	});
 });
 
 jest.mock("../src/models/models");

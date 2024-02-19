@@ -46,14 +46,9 @@ const startServer = async () => {
 		});
 		return app;
 	} catch (error) {
-		
 	}
 };
 
 startServer();
-
-app.get("/", (req, res) => {
-	res.send({ message: "Hi" });
-});
 
 export { startServer, stopServer };
