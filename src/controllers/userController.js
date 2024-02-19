@@ -5,7 +5,7 @@ import { validationResult } from "express-validator";
 import {
 	registerValidators,
 	loginValidators,
-} from "./validators/userValidators";
+} from "../validators/userValidator";
 
 const saltRounds = 10;
 
@@ -60,3 +60,4 @@ const userController = {
 		},
 	],
 };
+export default userController;
