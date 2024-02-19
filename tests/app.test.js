@@ -39,7 +39,7 @@ describe("userController", () => {
 			User.prototype.save.mockResolvedValue();
 
 			const response = await request(app)
-				.post("/api/users/register") // replace with your actual register route
+				.post("/api/users/register") 
 				.send(userData);
 
 			expect(response.status).toBe(201);
@@ -56,7 +56,7 @@ describe("userController", () => {
 			User.findOne.mockResolvedValue(userData);
 
 			const response = await request(app)
-				.post("/api/users/register") // replace with your actual register route
+				.post("/api/users/register") 
 				.send(userData);
 
 			expect(response.status).toBe(400);
@@ -78,7 +78,7 @@ describe("userController", () => {
 			});
 
 			const response = await request(app)
-				.post("/api/users/login") // replace with your actual login route
+				.post("/api/users/login") 
 				.send(userData);
 
 			expect(response.status).toBe(200);
@@ -95,7 +95,7 @@ describe("userController", () => {
 			User.findOne.mockResolvedValue(null);
 
 			const response = await request(app)
-				.post("/api/users/login") // replace with your actual login route
+				.post("/api/users/login") 
 				.send(userData);
 
 			expect(response.status).toBe(401);
