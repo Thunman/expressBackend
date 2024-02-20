@@ -5,8 +5,9 @@ import { validationResult } from "express-validator";
 import {
 	registerValidators,
 	loginValidators,
+    sendMessageValidators,
 } from "../middleware/validators/userValidator";
-import { messageSchema } from "../schemas/mongooseSchemas";
+
 
 const saltRounds = 10;
 
@@ -60,30 +61,38 @@ const userController = {
 			}
 		},
 	],
-	sendMessage: async (req, res) => {
-        const { sender, reciver, content, timeStamp } = req.body;
-        const token = req.headers['authorization'];
-        try {
-          jwt.verify(token, process.env.JWT_SECRET);
-        } catch (err) {
-          return res.status(401).json({ message: "Invalid token" });
+	sendMessage: [
+        ...sendMessageValidators,
+        async (req, res) => {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+            const { sender, reciver, content, timeStamp } = req.body;
+            const token = req.headers['authorization'];
+            try {
+                jwt.verify(token, process.env.JWT_SECRET);
+            } catch (err) {
+                return res.status(401).json({ message: "Invalid token" });
+            }
+            const senderUser = await User.findOne({ email: sender });
+            const reciverUser = await User.findOne({ email: reciver });
+            if (!reciverUser)
+                return res.status(401).json({ message: "Receiver does not exist" });
+            const newMessage = new Message({
+                sender: sender,
+                reciver: reciver,
+                text: content,
+                timeStamp: timeStamp,
+            });
+            await newMessage.save();
+            senderUser.messages.push(newMessage._id);
+            reciverUser.messages.push(newMessage._id);
+            await senderUser.save();
+            await reciverUser.save();
+            res.status(201).json({ message: "Message sent" });
         }
-        const senderUser = await User.findOne({ email: sender });
-        const reciverUser = await User.findOne({ email: reciver });
-        if (!reciverUser)
-          return res.status(401).json({ message: "Receiver does not exist" });
-        const newMessage = new Message({
-          sender: sender,
-          reciver: reciver,
-          text: content,
-          timeStamp: timeStamp,
-        });
-        await newMessage.save();
-        senderUser.messages.push(newMessage._id);
-        reciverUser.messages.push(newMessage._id);
-        await senderUser.save();
-        await reciverUser.save();
-        res.status(201).json({ message: "Message sent" });
-      },
+    ],  
+    
 };
 export default userController;
