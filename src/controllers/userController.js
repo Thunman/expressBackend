@@ -1,13 +1,12 @@
 import bcrypt from "bcrypt";
-import { Message, User } from "../models/models";
+import { Message, User } from "../models/models.js";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import {
 	registerValidators,
 	loginValidators,
-    sendMessageValidators,
-} from "../middleware/validators/userValidator";
-
+	sendMessageValidators,
+} from "../middleware/validators/userValidator.js";
 
 const saltRounds = 10;
 
@@ -29,6 +28,8 @@ const userController = {
 					userName,
 					email,
 					password: hashedPassword,
+					messages: [],
+					userInfo: {},
 				});
 				await newUser.save();
 				res.status(201).json({ message: "User Created" });
@@ -62,37 +63,33 @@ const userController = {
 		},
 	],
 	sendMessage: [
-        ...sendMessageValidators,
-        async (req, res) => {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
-            }
-            const { sender, reciver, content, timeStamp } = req.body;
-            const token = req.headers['authorization'];
-            try {
-                jwt.verify(token, process.env.JWT_SECRET);
-            } catch (err) {
-                return res.status(401).json({ message: "Invalid token" });
-            }
-            const senderUser = await User.findOne({ email: sender });
-            const reciverUser = await User.findOne({ email: reciver });
-            if (!reciverUser)
-                return res.status(401).json({ message: "Receiver does not exist" });
-            const newMessage = new Message({
-                sender: sender,
-                reciver: reciver,
-                text: content,
-                timeStamp: timeStamp,
-            });
-            await newMessage.save();
-            senderUser.messages.push(newMessage._id);
-            reciverUser.messages.push(newMessage._id);
-            await senderUser.save();
-            await reciverUser.save();
-            res.status(201).json({ message: "Message sent" });
-        }
-    ],  
-    
+		...sendMessageValidators,
+		async (req, res) => {
+			console.log(req.body);
+			const errors = validationResult(req);
+			if (!errors.isEmpty()) {
+				return res.status(400).json({ errors: errors.array() });
+			}
+			const { sender, reciver, text, timeStamp } = req.body;
+			const senderUser = await User.findOne({ email: sender });
+			const reciverUser = await User.findOne({ email: reciver });
+			if (!senderUser)
+				return res.status(401).json({ message: "Sender does not exist" });
+			if (!reciverUser)
+				return res.status(401).json({ message: "Receiver does not exist" });
+			const newMessage = new Message({
+				sender: sender,
+				reciver: reciver,
+				text: text,
+				timeStamp: timeStamp,
+			});
+			await newMessage.save();
+			senderUser.messages.push(newMessage._id);
+			reciverUser.messages.push(newMessage._id);
+			await senderUser.save();
+			await reciverUser.save();
+			res.status(201).json({ message: "Message sent" });
+		},
+	],
 };
 export default userController;

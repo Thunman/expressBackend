@@ -32,7 +32,7 @@ describe("userController", () => {
 			User.prototype.save.mockResolvedValue();
 
 			const response = await request(app)
-				.post("/api/users/register") 
+				.post("/api/users/register")
 				.send(userData);
 
 			expect(response.status).toBe(201);
@@ -49,7 +49,7 @@ describe("userController", () => {
 			User.findOne.mockResolvedValue(userData);
 
 			const response = await request(app)
-				.post("/api/users/register") 
+				.post("/api/users/register")
 				.send(userData);
 
 			expect(response.status).toBe(400);
@@ -71,7 +71,7 @@ describe("userController", () => {
 			});
 
 			const response = await request(app)
-				.post("/api/users/login") 
+				.post("/api/users/login")
 				.send(userData);
 
 			expect(response.status).toBe(200);
@@ -88,7 +88,7 @@ describe("userController", () => {
 			User.findOne.mockResolvedValue(null);
 
 			const response = await request(app)
-				.post("/api/users/login") 
+				.post("/api/users/login")
 				.send(userData);
 
 			expect(response.status).toBe(401);

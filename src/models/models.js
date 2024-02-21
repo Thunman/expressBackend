@@ -2,7 +2,7 @@ import {
 	userSchema,
 	messageSchema,
 	profileInfoSchema,
-} from "../schemas/mongooseSchemas";
+} from "../schemas/mongooseSchemas.js";
 import mongoose from "mongoose";
 
 export const User = mongoose.model("User", userSchema);

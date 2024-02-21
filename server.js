@@ -3,7 +3,10 @@ import { readFileSync } from "fs";
 import https from "https";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import userRouter from "./src/routes/routes";
+import { userRouter } from "./src/routes/routes.js";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import path from "path";
 
 dotenv.config();
 
@@ -18,25 +21,28 @@ const options = {
 
 const app = express();
 const server = https.createServer(options, app);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 app.use(express.json());
 app.use("/api/users", userRouter);
+app.use(express.static(path.join(__dirname, "public")));
 
 const stopServer = () => {
-    return new Promise((resolve, reject) => {
-      mongoose.connection.close()
-        .then(() => {
-          server.close((err) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            resolve();
-          });
-        })
-        .catch(reject);
-    });
-  }
+	return new Promise((resolve, reject) => {
+		mongoose.connection
+			.close()
+			.then(() => {
+				server.close((err) => {
+					if (err) {
+						reject(err);
+						return;
+					}
+					resolve();
+				});
+			})
+			.catch(reject);
+	});
+};
 
 const startServer = async () => {
 	try {
@@ -46,6 +52,7 @@ const startServer = async () => {
 		});
 		return app;
 	} catch (error) {
+		console.error(error);
 	}
 };
 

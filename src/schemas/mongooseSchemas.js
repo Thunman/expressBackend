@@ -13,6 +13,27 @@ export const userSchema = mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	messages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
+	userInfo: {
+		firstName: {
+			type: String,
+		},
+		lastName: {
+			type: String,
+		},
+		age: {
+			type: String,
+		},
+		location: {
+			type: String,
+		},
+		aboutText: {
+			type: String,
+		},
+		profilePicUrl: {
+			type: String,
+		},
+	},
 });
 
 export const messageSchema = mongoose.Schema({

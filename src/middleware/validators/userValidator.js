@@ -18,9 +18,4 @@ export const loginValidators = [
 	body("password").isLength({ min: 8 }),
 ];
 
-export const sendMessageValidators = [
-	body('sender').isEmail(),
-	body('receiver').isEmail(),
-	body('content').notEmpty(),
-	body('timeStamp').isISO8601(),
-  ];
+export const sendMessageValidators = [];
