@@ -25,8 +25,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 app.use(express.json());
 app.use("/api/users", userRouter);
-app.use(express.static(path.join(__dirname, "public")));
-
+app.use(
+	express.static(path.resolve("/home/thunman/frontEnd/PortfolioSite/build"))
+);
+app.get("*", (req, res) => {
+	res.sendFile(
+		path.resolve("/home/thunman/frontEnd/PortfolioSite/build", "index.html")
+	);
+});
 const stopServer = () => {
 	return new Promise((resolve, reject) => {
 		mongoose.connection

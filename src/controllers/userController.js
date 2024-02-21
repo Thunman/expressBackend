@@ -55,7 +55,15 @@ const userController = {
 					process.env.JWT_SECRET,
 					{ expiresIn: "1h" }
 				);
-				res.status(200).json({ message: "Welcome", token: accesToken });
+				res.status(200).json({
+					success: true,
+					message: {
+						email: user.email,
+						userName: user.userName,
+						token: accesToken,
+						uid: user._id,
+					},
+				});
 			} catch (error) {
 				console.error(error);
 				res.status(500).json({ message: "Server Error" });
