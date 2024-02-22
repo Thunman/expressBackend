@@ -30,6 +30,8 @@ const userController = {
 					password: hashedPassword,
 					messages: [],
 					userInfo: {},
+					hasNewMessages: false,
+					showEmail: false,
 				});
 				await newUser.save();
 				res.status(201).json({ message: "User Created" });
@@ -55,13 +57,13 @@ const userController = {
 					process.env.JWT_SECRET,
 					{ expiresIn: "1h" }
 				);
+				let userObj = user.toObject();
+				userObj.token = accesToken;
+				delete userObj.password;
 				res.status(200).json({
 					success: true,
 					message: {
-						email: user.email,
-						userName: user.userName,
-						token: accesToken,
-						uid: user._id,
+						user: userObj,
 					},
 				});
 			} catch (error) {
@@ -73,21 +75,25 @@ const userController = {
 	sendMessage: [
 		...sendMessageValidators,
 		async (req, res) => {
-			console.log(req.body);
 			const errors = validationResult(req);
 			if (!errors.isEmpty()) {
 				return res.status(400).json({ errors: errors.array() });
 			}
-			const { sender, reciver, text, timeStamp } = req.body;
-			const senderUser = await User.findOne({ email: sender });
-			const reciverUser = await User.findOne({ email: reciver });
+			try {
+				jwt.verify(req.headers.authorization, JWT_SECRET);
+			} catch (err) {
+				return res.status(403).json({ message: "Invalid token" });
+			}
+			const { senderId, reciverId, text, timeStamp } = req.body;
+			const senderUser = await User.findOne({ _id: senderId });
+			const reciverUser = await User.findOne({ _id: reciverId });
 			if (!senderUser)
 				return res.status(401).json({ message: "Sender does not exist" });
 			if (!reciverUser)
 				return res.status(401).json({ message: "Receiver does not exist" });
 			const newMessage = new Message({
-				sender: sender,
-				reciver: reciver,
+				sender: senderId,
+				reciver: reciverId,
 				text: text,
 				timeStamp: timeStamp,
 			});
@@ -99,5 +105,36 @@ const userController = {
 			res.status(201).json({ message: "Message sent" });
 		},
 	],
+	updateProfileInfo: async (req, res) => {
+		let userInfo = req.body;
+		try {
+			jwt.verify(req.headers.authorization, JWT_SECRET);
+		} catch (err) {
+			return res.status(403).json({ message: "Invalid token" });
+		}
+		const user = await User.findOne({ _id: userInfo.uid });
+		if (!user) return res.status(403).json({ message: "Invalid UID" });
+		user = updateUser(userInfo, user);
+		await user.save();
+		return res.status(201).json({ message: "Info Saved" });
+	},
+	getAllUsers: async (req, res) => {
+		try {
+			const users = await User.find({});
+			res.status(200).json(users);
+		} catch (error) {
+			console.error(error);
+			res.status(500).json({ message: "Server Error" });
+		}
+	},
 };
 export default userController;
+
+const updateUser = (userInfo, user) => {
+	for (let key in userInfo.userInfo) {
+		if (userInfo.userInfo.hasOwnProperty(key)) {
+			user.userInfo[key] = userInfo.userInfo[key];
+		}
+	}
+	return user;
+};

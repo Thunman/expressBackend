@@ -14,6 +14,12 @@ export const userSchema = mongoose.Schema({
 		required: true,
 	},
 	messages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
+	hasNewMessages: {
+		type: Boolean,
+	},
+	showEmail: {
+		type: Boolean,
+	},
 	userInfo: {
 		firstName: {
 			type: String,
