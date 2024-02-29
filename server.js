@@ -7,6 +7,8 @@ import { userRouter } from "./src/routes/routes.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import path from "path";
+import cors from "cors";
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -18,13 +20,17 @@ const options = {
 	key: readFileSync(sslKey),
 	cert: readFileSync(sslCert),
 };
-
 const app = express();
 const server = https.createServer(options, app);
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
 app.use(express.json());
+app.use(cookieParser());
 app.use("/api/users", userRouter);
+app.use(cors({
+	origin: 'http://localhost:3000',
+	credentials: true,
+}));
+
 app.use(
 	express.static(path.resolve("/home/thunman/frontEnd/PortfolioSite/build"))
 );
@@ -50,7 +56,6 @@ const stopServer = () => {
 			.catch(reject);
 	});
 };
-
 const startServer = async () => {
 	try {
 		await mongoose.connect(mongoUrl);
@@ -62,7 +67,6 @@ const startServer = async () => {
 		console.error(error);
 	}
 };
-
 startServer();
 
 export { startServer, stopServer };

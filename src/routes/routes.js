@@ -10,3 +10,4 @@ userRouter.post("/login", limiter, userController.login);
 userRouter.post("/sendMessage", limiter, auth, userController.sendMessage);
 userRouter.get("/getAllUsers", limiter, auth, userController.getAllUsers);
 userRouter.post("/updateProfileInformation", limiter, auth, userController.updateProfileInfo);
+userRouter.post("/token", userController.refreshToken);

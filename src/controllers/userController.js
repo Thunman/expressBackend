@@ -63,9 +63,27 @@ const userController = {
 					process.env.JWT_SECRET,
 					{ expiresIn: "1h" }
 				);
+				const refreshToken = jwt.sign(
+					{ id: user._id, email: user.email },
+					process.env.REFRESH_TOKEN_SECRET
+				)
 				let userObj = user.toObject();
 				userObj.token = accesToken;
 				delete userObj.password;
+				res.cookie("refreshToken", refreshToken, {
+					httpOnly: true,
+					secure: true,
+					sameSite: "None"
+				});
+				res.cookie("token", accesToken, {
+					httpOnly: true,
+					secure: true,
+					sameSite: "None"
+				});
+				res.cookie("loggedIn", true, {
+					secure: true,
+					sameSite: "None"
+				})
 				res.status(200).json({
 					success: true,
 					user: userObj
@@ -82,11 +100,6 @@ const userController = {
 			const errors = validationResult(req);
 			if (!errors.isEmpty()) {
 				return res.status(400).json({ errors: errors.array() });
-			}
-			try {
-				jwt.verify(req.headers.authorization, JWT_SECRET);
-			} catch (err) {
-				return res.status(403).json({ message: "Invalid token" });
 			}
 			const { senderId, reciverId, text, timeStamp } = req.body;
 			const senderUser = await User.findOne({ _id: senderId });
@@ -126,6 +139,37 @@ const userController = {
 			res.status(500).json({ message: "Server Error" });
 		}
 	},
+	refreshToken: async (req, res) => {
+		const refreshToken = req.cookies.refreshToken;
+		if (!refreshToken) return res.status(403).json({ message: "No refresh token provided" });
+		try {
+			const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+			const accessToken = jwt.sign(
+				{ id: decoded.id, email: decoded.email },
+				process.env.JWT_SECRET,
+				{ expiresIn: "1h" }
+			);
+			const refreshToken = jwt.sign(
+				{ id: user._id, email: user.email },
+				process.env.REFRESH_TOKEN_SECRET
+			);
+			res.cookie("token", accessToken, {
+				httpOnly: true,
+				secure: true,
+				sameSite: "None"
+			});
+			res.cookie("refreshToken", refreshToken, {
+				httpOnly: true,
+				secure: true,
+				sameSite: "None"
+			});
+			res.status(200)
+		} catch (error) {
+			console.error(error)
+			res.status(500).json({ message: "Server Error" })
+		}
+	}
 };
 export default userController;
 
