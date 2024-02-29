@@ -21,10 +21,7 @@ export const userSchema = mongoose.Schema({
 		type: Boolean,
 	},
 	userInfo: {
-		firstName: {
-			type: String,
-		},
-		lastName: {
+		name: {
 			type: String,
 		},
 		age: {

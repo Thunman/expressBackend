@@ -29,7 +29,13 @@ const userController = {
 					email,
 					password: hashedPassword,
 					messages: [],
-					userInfo: {},
+					userInfo: {
+						name: "",
+						age: "",
+						location: "",
+						aboutText: "",
+						profilePicUrl: "",
+					},
 					hasNewMessages: false,
 					showEmail: false,
 				});
@@ -62,9 +68,7 @@ const userController = {
 				delete userObj.password;
 				res.status(200).json({
 					success: true,
-					message: {
-						user: userObj,
-					},
+					user: userObj
 				});
 			} catch (error) {
 				console.error(error);
@@ -106,22 +110,17 @@ const userController = {
 		},
 	],
 	updateProfileInfo: async (req, res) => {
-		let userInfo = req.body;
-		try {
-			jwt.verify(req.headers.authorization, JWT_SECRET);
-		} catch (err) {
-			return res.status(403).json({ message: "Invalid token" });
-		}
-		const user = await User.findOne({ _id: userInfo.uid });
+		let userObj = req.body;
+		let user = await User.findOne({ _id: userObj._id });
 		if (!user) return res.status(403).json({ message: "Invalid UID" });
-		user = updateUser(userInfo, user);
+		Object.assign(user, userObj)
 		await user.save();
 		return res.status(201).json({ message: "Info Saved" });
 	},
 	getAllUsers: async (req, res) => {
 		try {
 			const users = await User.find({});
-			res.status(200).json(users);
+			return res.status(200).json(users);
 		} catch (error) {
 			console.error(error);
 			res.status(500).json({ message: "Server Error" });
@@ -130,11 +129,3 @@ const userController = {
 };
 export default userController;
 
-const updateUser = (userInfo, user) => {
-	for (let key in userInfo.userInfo) {
-		if (userInfo.userInfo.hasOwnProperty(key)) {
-			user.userInfo[key] = userInfo.userInfo[key];
-		}
-	}
-	return user;
-};

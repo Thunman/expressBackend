@@ -33,6 +33,7 @@ app.get("*", (req, res) => {
 		path.resolve("/home/thunman/frontEnd/PortfolioSite/build", "index.html")
 	);
 });
+app.set('trust proxy', 1);
 const stopServer = () => {
 	return new Promise((resolve, reject) => {
 		mongoose.connection
